@@ -1,0 +1,370 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 4.375
+#  >methods=8
+#  >complexity=35
+#  >construction=0.25
+#  >dependency=0.5
+ - target:
+   - dir: target/classes
+     file: org/uncommons/reportng/JUnitXMLReporter$TestClassResults.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/JUnitXMLReporter.java
+   - dir: target/classes
+     file: org/uncommons/reportng/JUnitXMLReporter.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/JUnitXMLReporter.java
+   - dir: target/classes
+     file: org/uncommons/reportng/ReportMetadata.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReportMetadata.java
+# Target TGF: 127.229166667
+#  >methods=21
+#  >complexity=563
+#  >construction=6.25
+#  >dependency=3.41666666667
+ - target:
+   - dir: target/classes
+     file: org/uncommons/reportng/AbstractReporter.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/AbstractReporter.java
+   - dir: target/classes
+     file: org/uncommons/reportng/ReportNGException.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReportNGException.java
+   - dir: target/classes
+     file: org/uncommons/reportng/ReporterHelper.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReporterHelper.java
+   - dir: target/classes
+     file: org/uncommons/reportng/ReportMetadata.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReportMetadata.java
+   - dir: target/classes
+     file: org/uncommons/reportng/ReportNGUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReportNGUtils.java
+# Target TGF: 1.28571428571
+#  >methods=3
+#  >complexity=18
+#  >construction=0.142857142857
+#  >dependency=0.5
+ - target:
+   - dir: target/classes
+     file: org/uncommons/reportng/TestResultComparator.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/TestResultComparator.java
+# Target TGF: 11569.1988095
+#  >methods=96
+#  >complexity=8400
+#  >construction=117.535714286
+#  >dependency=28.6
+ - target:
+   - dir: target/classes
+     file: org/uncommons/reportng/ReportNGUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReportNGUtils.java
+   - dir: target/classes
+     file: org/uncommons/reportng/dto/IssueDTO.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/dto/IssueDTO.java
+   - dir: target/classes
+     file: org/uncommons/reportng/dto/IssuesDTO.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/dto/IssuesDTO.java
+   - dir: target/classes
+     file: org/uncommons/reportng/ReportNGUtils$1.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReportNGUtils.java
+   - dir: target/classes
+     file: org/uncommons/reportng/dto/ResultsDTO.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/dto/ResultsDTO.java
+   - dir: target/classes
+     file: org/uncommons/reportng/dto/PackageDetailsDTO.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/dto/PackageDetailsDTO.java
+   - dir: target/classes
+     file: org/uncommons/reportng/ReporterHelper.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReporterHelper.java
+   - dir: target/classes
+     file: org/uncommons/reportng/HTMLReporter.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/HTMLReporter.java
+   - dir: target/classes
+     file: org/uncommons/reportng/dto/ResultStatus.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/dto/ResultStatus.java
+# Target TGF: 27.0
+#  >methods=5
+#  >complexity=81
+#  >construction=1.0
+#  >dependency=0.333333333333
+ - target:
+   - dir: target/classes
+     file: org/uncommons/reportng/JUnitXMLReporter.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/JUnitXMLReporter.java
+   - dir: target/classes
+     file: org/uncommons/reportng/JUnitXMLReporter$TestClassResults.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/JUnitXMLReporter.java
+   - dir: target/classes
+     file: org/uncommons/reportng/AbstractReporter.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/AbstractReporter.java
+   - dir: target/classes
+     file: org/uncommons/reportng/ReportNGException.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReportNGException.java
+# Target TGF: 98.0
+#  >methods=27
+#  >complexity=114
+#  >construction=2.0
+#  >dependency=1.5
+ - target:
+   - dir: target/classes
+     file: org/uncommons/reportng/HTMLReporter.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/HTMLReporter.java
+   - dir: target/classes
+     file: org/uncommons/reportng/ReporterHelper.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReporterHelper.java
+   - dir: target/classes
+     file: org/uncommons/reportng/TestMethodComparator.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/TestMethodComparator.java
+   - dir: target/classes
+     file: org/uncommons/reportng/ReportNGException.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReportNGException.java
+   - dir: target/classes
+     file: org/uncommons/reportng/AbstractReporter.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/AbstractReporter.java
+   - dir: target/classes
+     file: org/uncommons/reportng/TestClassComparator.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/TestClassComparator.java
+   - dir: target/classes
+     file: org/uncommons/reportng/TestResultComparator.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/TestResultComparator.java
+# Target TGF: 114.5
+#  >methods=16
+#  >complexity=150
+#  >construction=11.0
+#  >dependency=10.0
+ - target:
+   - dir: target/classes
+     file: org/uncommons/reportng/ReportMetadata.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReportMetadata.java
+# Target TGF: 1009.14642857
+#  >methods=5
+#  >complexity=1771
+#  >construction=14.7857142857
+#  >dependency=0.67619047619
+ - target:
+   - dir: target/classes
+     file: org/uncommons/reportng/ReporterHelper.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReporterHelper.java
+   - dir: target/classes
+     file: org/uncommons/reportng/dto/IssueDTO.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/dto/IssueDTO.java
+   - dir: target/classes
+     file: org/uncommons/reportng/ReportNGUtils.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/ReportNGUtils.java
+   - dir: target/classes
+     file: org/uncommons/reportng/dto/IssuesDTO.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/dto/IssuesDTO.java
+   - dir: target/classes
+     file: org/uncommons/reportng/dto/ResultsDTO.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/dto/ResultsDTO.java
+   - dir: target/classes
+     file: org/uncommons/reportng/dto/PackageDetailsDTO.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/dto/PackageDetailsDTO.java
+# Target TGF: 2.64285714286
+#  >methods=3
+#  >complexity=37
+#  >construction=0.142857142857
+#  >dependency=0.5
+ - target:
+   - dir: target/classes
+     file: org/uncommons/reportng/TestMethodComparator.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/TestMethodComparator.java
+# Target TGF: 1.28571428571
+#  >methods=3
+#  >complexity=18
+#  >construction=0.142857142857
+#  >dependency=0.5
+ - target:
+   - dir: target/classes
+     file: org/uncommons/reportng/TestClassComparator.class
+     sourceDir: src/main/java
+     sourceFile: org/uncommons/reportng/TestClassComparator.java
